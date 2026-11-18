@@ -458,9 +458,27 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:10px 0 30px
   var links = document.querySelectorAll('#links a');
   function spy(){
     var cur = ''; links.forEach(function(a){ var s=document.getElementById(a.dataset.id); if(s && s.getBoundingClientRect().top < 120) cur = a.dataset.id; });
-    links.forEach(function(a){ var on = a.dataset.id===cur; if(on && !a.classList.contains('on')) a.scrollIntoView({block:'nearest',inline:'nearest'}); a.classList.toggle('on', on); });
+    links.forEach(function(a){ var on = a.dataset.id===cur;
+      if(on && !a.classList.contains('on')){ /* keep the active tab visible in the menu bar, without touching page scroll */
+        var bar = a.parentNode, l = a.offsetLeft, r = l + a.offsetWidth;
+        if (l < bar.scrollLeft) bar.scrollLeft = l - 8; else if (r > bar.scrollLeft + bar.clientWidth) bar.scrollLeft = r - bar.clientWidth + 8;
+      }
+      a.classList.toggle('on', on); });
   }
   window.addEventListener('scroll', spy, {passive:true}); spy();
+
+  /* menu clicks: scroll to the section below the sticky bar */
+  document.getElementById('links').addEventListener('click', function(e){
+    var a = e.target.closest('a'); if(!a) return;
+    var s = document.getElementById(a.dataset.id); if(!s) return;
+    e.preventDefault();
+    var navH = document.querySelector('.nav').offsetHeight;
+    var y = s.getBoundingClientRect().top + window.scrollY - (s.classList.contains('in') ? 0 : 12); /* ignore the fade-in offset */
+    s.classList.add('in');
+    window.scrollTo({ top: y - navH - 12, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    history.replaceState(null, '', '#' + a.dataset.id);
+  });
+  document.getElementById('brand').addEventListener('click', function(e){ e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'}); });
 })();
 </script>
 </body>
