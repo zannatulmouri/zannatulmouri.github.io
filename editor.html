@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Website Editor</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5fa;--panel:#fff;--ink:#0b1730;--muted:#5a6a84;--line:#dbe3ee;--a:#0f766e;--a-soft:#e0f2f1;--warn:#b45309}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font:14px/1.5 Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;background:#0a2240;color:#fff}
+header h1{font-size:15px;margin:0 auto 0 0;font-weight:700}
+header small{opacity:.7;font-weight:400;margin-left:6px}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);font:600 13px Inter,sans-serif;padding:7px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--a)}
+.btn.pri{background:var(--a);border-color:var(--a);color:#fff}
+.btn.sm{padding:3px 8px;font-size:12px;font-weight:500}
+.btn.danger{color:#b91c1c}
+header .btn{border-color:rgba(255,255,255,.25)}
+.status{font-size:12px;opacity:.8;min-width:90px}
+.app{flex:1;display:grid;grid-template-columns:minmax(380px,44%) 1fr;min-height:0}
+.side{display:grid;grid-template-columns:150px 1fr;min-height:0;border-right:1px solid var(--line);background:var(--panel)}
+.tabs{border-right:1px solid var(--line);overflow:auto;padding:8px 6px;background:#f8fafc}
+.tabs button{display:block;width:100%;text-align:left;border:0;background:none;font:500 13px Inter,sans-serif;color:var(--ink);padding:7px 10px;border-radius:7px;cursor:pointer}
+.tabs button:hover{background:#eef2f7}
+.tabs button.on{background:var(--a);color:#fff}
+.form{overflow:auto;padding:16px 18px 60px}
+.form h2{font-size:18px;margin:0 0 4px}
+.hint{color:var(--muted);font-size:12.5px;margin:0 0 14px}
+.field{margin-bottom:12px}
+.field label{display:block;font-weight:600;font-size:12.5px;margin-bottom:4px}
+.field .help{font-weight:400;color:var(--muted);font-size:12px;margin-top:3px}
+input[type=text],textarea,select{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:14px Inter,sans-serif;color:var(--ink);background:#fff}
+textarea{resize:vertical;min-height:70px}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--a-soft);border-color:var(--a)}
+.item{border:1px solid var(--line);border-radius:10px;padding:12px 12px 4px;margin-bottom:10px;background:#fbfcfe}
+.item .item .item{background:#fff}
+.item-h{display:flex;align-items:center;gap:6px;margin:-2px 0 10px}
+.item-h b{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item.collapsed>*:not(.item-h){display:none}
+.add{margin:2px 0 14px}
+.sub-label{font-weight:700;font-size:12.5px;margin:6px 0 6px;color:var(--a)}
+.img-row{display:flex;gap:8px;align-items:center}
+.img-row input{flex:1}
+.thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--line);background:#eef2f7;flex:none}
+.sec-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin-bottom:6px;background:#fbfcfe}
+.sec-row input[type=text]{flex:1;padding:5px 8px}
+.sec-row code{font-size:11.5px;color:var(--muted);width:82px}
+.preview{display:flex;flex-direction:column;min-height:0;background:#e6ebf2}
+.pv-bar{display:flex;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:#f8fafc;font-size:12.5px;color:var(--muted)}
+.pv-bar .btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pv-wrap{flex:1;display:flex;justify-content:center;min-height:0;overflow:auto;padding:0}
+iframe{border:0;width:100%;height:100%;background:#fff}
+.pv-wrap.mobile iframe{width:390px;margin:12px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+.notice{background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;border-radius:8px;padding:8px 12px;font-size:12.5px;margin-bottom:14px}
+.notice b{font-weight:700}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .preview{display:none}
+  .app.show-pv .side{display:none}
+  .app.show-pv .preview{display:flex}
+  .side{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .tabs{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .tabs button{width:auto;white-space:nowrap}
+  #mobPv{display:inline-block!important}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Website Editor <small>changes save in this browser automatically</small></h1>
+  <span class="status" id="status"></span>
+  <button class="btn" id="mobPv" style="display:none">Preview</button>
+  <button class="btn" id="importBtn">Import data.js</button>
+  <button class="btn" id="resetBtn">Discard draft</button>
+  <button class="btn pri" id="dlBtn">Download data.js</button>
+  <input type="file" id="importFile" accept=".js,.json" hidden>
+</header>
+
+<div class="app" id="app">
+  <div class="side">
+    <nav class="tabs" id="tabs"></nav>
+    <div class="form" id="form"></div>
+  </div>
+  <div class="preview">
+    <div class="pv-bar">Live preview
+      <span style="flex:1"></span>
+      <button class="btn sm on" data-pv="desktop">Desktop</button>
+      <button class="btn sm" data-pv="mobile">Mobile</button>
+    </div>
+    <div class="pv-wrap" id="pvWrap"><iframe id="pv" title="Preview"></iframe></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  /* ------------------------------------------------------------------
+     Field types: text, textarea, select, image, lines (one item per line),
+     list (repeatable group of fields)
+     ------------------------------------------------------------------ */
+  var ROLE = {key:'roles', type:'list', label:'Roles / positions', itemName:'Role', title:'title', fields:[
+    {key:'title', label:'Role title'},
+    {key:'period', label:'Period', help:'e.g. 2024 – Present'},
+    {key:'description', label:'Description', type:'textarea'} ]};
+  var ORG_LIST = function(itemName){ return {type:'list', itemName:itemName, title:'org', fields:[
+    {key:'org', label:'Organization / lab'},
+    {key:'url', label:'Link (optional)', help:'Website of the lab or organization'},
+    {key:'badge', label:'Badge (optional)', help:'Small tag on the right, e.g. Current, Teaching, Internship'},
+    ROLE ]}; };
+
+  var TABS = [
+    {id:'settings', label:'Site settings', hint:'Browser tab title, colour theme and footer.', type:'object', fields:[
+      {key:'pageTitle', label:'Browser tab title'},
+      {key:'navSubtitle', label:'Subtitle under your name in the top bar'},
+      {key:'accent', label:'Colour theme', type:'select', options:['teal','blue','purple','maroon','amber']},
+      {key:'highlightName', label:'Your name as it appears in author lists', help:'Every match is highlighted in your publications, e.g. "Mouri ZF".'},
+      {key:'footerText', label:'Footer text'} ]},
+    {id:'sections', label:'Sections & order', hint:'Turn sections on or off, rename their menu labels, and move them up or down.', type:'sections'},
+    {id:'profile', label:'Profile card', hint:'The coloured card on the left with your photo.', type:'object', fields:[
+      {key:'name', label:'Full name'},
+      {key:'photo', label:'Profile photo', type:'image', max:600, help:'Upload a photo, or put it in the images folder and type its path (e.g. images/me.jpg).'},
+      {key:'status', label:'Status chip', help:'e.g. PhD Researcher, Open to internships'},
+      {key:'credentials', label:'Degree chip', help:'e.g. PhD Student, M.Sc.'},
+      {key:'position', label:'Position'},
+      {key:'institution', label:'Institution'},
+      {key:'institutionUrl', label:'Institution link (optional)'},
+      {key:'address', label:'Location'},
+      {key:'email', label:'Email'},
+      {key:'cv', label:'CV file (optional)', help:'Upload your CV PDF to the site folder and type its name here, e.g. Mouri_CV.pdf. Leave empty to hide the button.'},
+      {key:'keywords', label:'Keyword tags', type:'lines', help:'One per line'},
+      {key:'links', label:'Profile links', type:'list', itemName:'Link', title:'label', fields:[
+        {key:'label', label:'Label', help:'e.g. Google Scholar, ORCID, LinkedIn'},
+        {key:'url', label:'URL', help:'Links left empty are hidden.'} ]} ]},
+    {id:'about', label:'About', type:'object', fields:[
+      {key:'heading', label:'Heading'},
+      {key:'text', label:'Text', type:'textarea', rows:9, help:'Leave a blank line between paragraphs. **bold** and [link text](https://...) work.'} ]},
+    {id:'research', label:'Research', type:'object', fields:[
+      {key:'heading', label:'Section heading'},
+      {key:'items', label:'Projects', type:'list', itemName:'Project', title:'title', fields:[
+        {key:'title', label:'Project title'},
+        {key:'description', label:'Short description', type:'textarea'} ]} ]},
+    {id:'education', label:'Education', type:'list', itemName:'Degree', title:'degree', fields:[
+      {key:'degree', label:'Degree'},
+      {key:'institution', label:'Institution'},
+      {key:'period', label:'Period', help:'e.g. 2024 – Present'},
+      {key:'details', label:'Details', type:'textarea', help:'Thesis title, focus, etc.'},
+      {key:'gpa', label:'CGPA (optional)'} ]},
+    {id:'experience', label:'Experience', hint:'Each block is one lab or organization; add several roles inside it.'},
+    {id:'metrics', label:'Metrics', hint:'The row of big numbers. Type "auto" to count your publications automatically.', type:'list', itemName:'Metric', title:'label', fields:[
+      {key:'label', label:'Label'},
+      {key:'value', label:'Value', help:'e.g. 5, 3+, or auto'} ]},
+    {id:'skills', label:'Skills', type:'list', itemName:'Skill group', title:'title', fields:[
+      {key:'title', label:'Group title'},
+      {key:'subtitle', label:'Subtitle'},
+      {key:'items', label:'Skills', type:'list', itemName:'Skill', title:'name', fields:[
+        {key:'name', label:'Skill name (bold)'},
+        {key:'detail', label:'Details'} ]} ]},
+    {id:'publications', label:'Publications', hint:'Filter buttons are created from the Status values you use.', type:'list', itemName:'Publication', title:'title', fields:[
+      {key:'title', label:'Title', type:'textarea', rows:2},
+      {key:'authors', label:'Authors'},
+      {key:'venue', label:'Journal / conference'},
+      {key:'year', label:'Year or date'},
+      {key:'status', label:'Status', type:'select', options:['Published','Under Review','Conference','Upcoming','In Preparation','Accepted','Preprint']},
+      {key:'doi', label:'DOI (optional)', help:'Just the DOI, e.g. 10.1109/TDEI.2026.123456'},
+      {key:'url', label:'Link (optional)'} ]},
+    {id:'news', label:'Updates', type:'list', itemName:'Update', title:'text', fields:[
+      {key:'date', label:'Date'},
+      {key:'text', label:'Update', type:'textarea', rows:2} ]},
+    {id:'awards', label:'Awards & training', type:'list', itemName:'Award', title:'title', fields:[
+      {key:'title', label:'Title'},
+      {key:'org', label:'Organization'},
+      {key:'date', label:'Date'},
+      {key:'tag', label:'Tag', help:'e.g. Scholarship, Training, Travel grant'},
+      {key:'description', label:'Description', type:'textarea'},
+      {key:'link', label:'Credential link or image (optional)'} ]},
+    {id:'activities', label:'Activities', hint:'Clubs, volunteering, service. Turn the section on in "Sections & order".'},
+    {id:'gallery', label:'Gallery', hint:'For many photos, put them in the images folder and type the path (keeps the site fast).', type:'list', itemName:'Photo', title:'title', fields:[
+      {key:'img', label:'Image', type:'image', max:1400},
+      {key:'title', label:'Title'},
+      {key:'album', label:'Album', help:'Photos with the same album name are grouped under one filter button.'},
+      {key:'caption', label:'Caption', type:'textarea', rows:2} ]},
+    {id:'references', label:'References', type:'list', itemName:'Reference', title:'name', fields:[
+      {key:'name', label:'Name'},
+      {key:'title', label:'Title / position'},
+      {key:'dept', label:'Department & institution', type:'textarea', rows:3, help:'Each line shows on its own line.'},
+      {key:'email', label:'Email'},
+      {key:'url', label:'Website (optional)'},
+      {key:'badge', label:'Relationship badge', help:'e.g. PhD Advisor, Research Supervisor'},
+      {key:'photo', label:'Photo (optional)', type:'image', max:300} ]},
+    {id:'contact', label:'Contact', type:'object', fields:[
+      {key:'heading', label:'Heading'},
+      {key:'text', label:'Text', type:'textarea'} ]}
+  ];
+  /* experience + activities share a layout */
+  TABS.forEach(function(t){ if(t.id==='experience'||t.id==='activities'){ var o = ORG_LIST(t.id==='experience'?'Organization':'Activity'); for(var k in o) t[k]=o[k]; } });
+
+  /* ---------- state ---------- */
+  var DRAFT_KEY = 'site-draft';
+  var D, fromDraft = false;
+  try { var dr = localStorage.getItem(DRAFT_KEY); if (dr) { D = JSON.parse(dr); fromDraft = true; } } catch(e){}
+  if (!D) D = JSON.parse(JSON.stringify(window.SITE || {}));
+  var current = 'profile';
+  var $ = function(id){ return document.getElementById(id); };
+  var statusEl = $('status');
+
+  function blank(fields){ var o = {}; fields.forEach(function(f){ o[f.key] = f.type==='list' ? [] : f.type==='lines' ? [] : ''; }); return o; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  /* ---------- save + preview ---------- */
+  var timer;
+  function changed(){
+    clearTimeout(timer); statusEl.textContent = 'Saving…';
+    timer = setTimeout(function(){
+      var json = JSON.stringify(D);
+      try { localStorage.setItem(DRAFT_KEY, json); localStorage.setItem('site-preview', json); statusEl.textContent = 'Draft saved'; }
+      catch(e){ statusEl.textContent = 'Browser storage full — use image paths instead of uploads'; }
+      refreshPreview();
+    }, 500);
+  }
+  var pv = $('pv');
+  function refreshPreview(){
+    var y = 0; try { y = pv.contentWindow.scrollY; } catch(e){}
+    pv.onload = function(){ try { pv.contentWindow.document.documentElement.style.scrollBehavior='auto'; pv.contentWindow.scrollTo(0,y); pv.contentWindow.document.querySelectorAll('.reveal').forEach(function(r){r.classList.add('in');}); } catch(e){} };
+    pv.src = 'index.html?preview=' + Date.now();
+  }
+
+  /* ---------- form rendering ---------- */
+  function fieldHTML(f, val, path){
+    var t = f.type || 'text', id = 'f_' + path.join('_');
+    var help = f.help ? '<div class="help">'+esc(f.help)+'</div>' : '';
+    var p = esc(JSON.stringify(path));
+    if (t === 'list') return listHTML(f, val || [], path);
+    var input;
+    if (t === 'textarea') input = '<textarea id="'+id+'" rows="'+(f.rows||4)+'" data-path="'+p+'">'+esc(val)+'</textarea>';
+    else if (t === 'lines') input = '<textarea id="'+id+'" rows="5" data-path="'+p+'" data-lines="1">'+esc((val||[]).join('\n'))+'</textarea>';
+    else if (t === 'select') {
+      var opts = f.options.slice(); if (val && opts.indexOf(val)<0) opts.unshift(val);
+      input = '<select id="'+id+'" data-path="'+p+'">'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select>';
+    }
+    else if (t === 'image') input = '<div class="img-row">'+(val?'<img class="thumb" src="'+esc(val)+'" alt="">':'<span class="thumb"></span>')+
+      '<input type="text" id="'+id+'" data-path="'+p+'" value="'+esc(String(val||'').indexOf('data:')===0?'(uploaded image)':val)+'" '+(String(val||'').indexOf('data:')===0?'readonly':'')+'>'+
+      '<button class="btn sm" data-upload="'+p+'" data-max="'+(f.max||800)+'">Upload</button>'+(val?'<button class="btn sm danger" data-clear="'+p+'">Remove</button>':'')+'</div>';
+    else input = '<input type="text" id="'+id+'" data-path="'+p+'" value="'+esc(val)+'">';
+    return '<div class="field"><label for="'+id+'">'+esc(f.label)+'</label>'+input+help+'</div>';
+  }
+  function listHTML(f, arr, path){
+    var p = esc(JSON.stringify(path));
+    var h = path.length > 1 ? '<div class="sub-label">'+esc(f.label||'')+'</div>' : '';
+    arr.forEach(function(item, i){
+      var ip = path.concat(i), ttl = item[f.title] || ('New ' + (f.itemName||'item').toLowerCase());
+      h += '<div class="item"><div class="item-h"><b data-key="'+esc(f.title)+'">'+esc(String(ttl).slice(0,80))+'</b>'+
+        '<button class="btn sm" data-move="'+p+'" data-i="'+i+'" data-d="-1" title="Move up"'+(i===0?' disabled':'')+'>↑</button>'+
+        '<button class="btn sm" data-move="'+p+'" data-i="'+i+'" data-d="1" title="Move down"'+(i===arr.length-1?' disabled':'')+'>↓</button>'+
+        '<button class="btn sm" data-toggle title="Collapse">–</button>'+
+        '<button class="btn sm danger" data-del="'+p+'" data-i="'+i+'">Delete</button></div>'+
+        f.fields.map(function(sf){ return fieldHTML(sf, item[sf.key], ip.concat(sf.key)); }).join('')+'</div>';
+    });
+    return h + '<button class="btn add" data-add="'+p+'" data-tab="'+esc(current)+'">+ Add '+esc((f.itemName||'item').toLowerCase())+'</button>';
+  }
+  function findListDef(path){
+    var tab = TABS.filter(function(t){return t.id===path[0];})[0], def = tab;
+    for (var i = 1; i < path.length; i++) {
+      if (typeof path[i] === 'number') continue;
+      def = (def.fields||[]).filter(function(f){return f.key===path[i];})[0];
+    }
+    return def;
+  }
+  function get(path){ return path.reduce(function(o,k){ return o==null?o:o[k]; }, D); }
+  function set(path, v){ var o = D; for (var i=0;i<path.length-1;i++){ if(o[path[i]]==null) o[path[i]] = typeof path[i+1]==='number'?[]:{}; o = o[path[i]]; } o[path[path.length-1]] = v; }
+
+  function render(){
+    $('tabs').innerHTML = TABS.map(function(t){ return '<button data-tabid="'+t.id+'" class="'+(t.id===current?'on':'')+'">'+esc(t.label)+'</button>'; }).join('');
+    var t = TABS.filter(function(x){return x.id===current;})[0], h = '<h2>'+esc(t.label)+'</h2><p class="hint">'+esc(t.hint||'')+'</p>';
+    if (fromDraft && current==='profile') h = '<div class="notice"><b>Editing your saved draft.</b> Click "Download data.js" when you\'re done, then replace data.js in your website folder.</div>' + h;
+    if (t.type === 'object') { D[t.id] = D[t.id] || {}; h += t.fields.map(function(f){ return fieldHTML(f, D[t.id][f.key], [t.id, f.key]); }).join(''); }
+    else if (t.type === 'list') { D[t.id] = D[t.id] || []; h += listHTML(t, D[t.id], [t.id]); }
+    else if (t.type === 'sections') {
+      D.sections = D.sections || [];
+      h += D.sections.map(function(s,i){ return '<div class="sec-row"><input type="checkbox" data-sec-show="'+i+'"'+(s.show?' checked':'')+' title="Show this section"><code>'+esc(s.id)+'</code>'+
+        '<input type="text" data-sec-label="'+i+'" value="'+esc(s.label)+'">'+
+        '<button class="btn sm" data-sec-move="'+i+'" data-d="-1"'+(i===0?' disabled':'')+'>↑</button><button class="btn sm" data-sec-move="'+i+'" data-d="1"'+(i===D.sections.length-1?' disabled':'')+'>↓</button></div>'; }).join('');
+    }
+    var form = $('form'), y = form.scrollTop; form.innerHTML = h; form.scrollTop = y;
+  }
+
+  /* ---------- events ---------- */
+  $('tabs').addEventListener('click', function(e){ var b = e.target.closest('[data-tabid]'); if(!b) return; current = b.dataset.tabid; $('form').scrollTop = 0; render(); });
+  var form = $('form');
+  form.addEventListener('input', function(e){
+    var el = e.target;
+    if (el.dataset.path && !el.readOnly) {
+      var path = JSON.parse(el.dataset.path);
+      set(path, el.dataset.lines ? el.value.split('\n').map(function(s){return s.trim();}).filter(Boolean) : el.value);
+      /* keep the item's header title in sync */
+      var item = el.closest('.item'), hb = item && item.querySelector(':scope > .item-h b');
+      if (hb && hb.dataset.key === path[path.length-1]) hb.textContent = el.value.slice(0,80) || 'Untitled';
+      changed();
+    }
+    if (el.dataset.secLabel != null) { D.sections[+el.dataset.secLabel].label = el.value; changed(); }
+  });
+  form.addEventListener('change', function(e){
+    var el = e.target;
+    if (el.dataset.secShow != null) { D.sections[+el.dataset.secShow].show = el.checked; changed(); }
+  });
+  form.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.add) { var p = JSON.parse(b.dataset.add), def = findListDef(p), arr = get(p); if(!arr){ arr=[]; set(p,arr); } arr.push(blank(def.fields)); render(); changed(); }
+    else if (b.dataset.del) { if(!confirm('Delete this item?')) return; get(JSON.parse(b.dataset.del)).splice(+b.dataset.i,1); render(); changed(); }
+    else if (b.dataset.move) { var a = get(JSON.parse(b.dataset.move)), i = +b.dataset.i, j = i + (+b.dataset.d); var t = a[i]; a[i] = a[j]; a[j] = t; render(); changed(); }
+    else if (b.dataset.secMove != null) { var s = D.sections, i2 = +b.dataset.secMove, j2 = i2 + (+b.dataset.d); var t2 = s[i2]; s[i2] = s[j2]; s[j2] = t2; render(); changed(); }
+    else if (b.hasAttribute('data-toggle')) { var it = b.closest('.item'); it.classList.toggle('collapsed'); b.textContent = it.classList.contains('collapsed') ? '+' : '–'; }
+    else if (b.dataset.clear) { set(JSON.parse(b.dataset.clear), ''); render(); changed(); }
+    else if (b.dataset.upload) { pickImage(JSON.parse(b.dataset.upload), +b.dataset.max); }
+  });
+
+  /* image upload: resized and embedded so it works without a separate file */
+  function pickImage(path, max){
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = function(){
+      var file = inp.files[0]; if (!file) return;
+      var r = new FileReader();
+      r.onload = function(){
+        var im = new Image();
+        im.onload = function(){
+          var s = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas');
+          c.width = Math.round(im.width*s); c.height = Math.round(im.height*s);
+          var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,c.width,c.height); ctx.drawImage(im,0,0,c.width,c.height);
+          set(path, c.toDataURL('image/jpeg', .85)); render(); changed();
+        };
+        im.src = r.result;
+      };
+      r.readAsDataURL(file);
+    };
+    inp.click();
+  }
+
+  /* ---------- download / import / reset ---------- */
+  $('dlBtn').onclick = function(){
+    var txt = '/* =====================================================================\n   YOUR WEBSITE CONTENT — generated by editor.html on ' + new Date().toISOString().slice(0,10) + '\n' +
+      '   Edit with editor.html, or by hand (keep the quotes and commas intact).\n   ===================================================================== */\n' +
+      'window.SITE = ' + JSON.stringify(D, null, 2) + ';\n';
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], {type:'text/javascript'})); a.download = 'data.js';
+    document.body.appendChild(a); a.click(); a.remove();
+    statusEl.textContent = 'Downloaded — replace data.js in your site folder';
+  };
+  $('importBtn').onclick = function(){ $('importFile').click(); };
+  $('importFile').onchange = function(){
+    var f = this.files[0]; if (!f) return; var r = new FileReader();
+    r.onload = function(){
+      try {
+        var s = String(r.result), a = s.indexOf('{', s.indexOf('window.SITE')), b = s.lastIndexOf('}');
+        D = JSON.parse(s.slice(a < 0 ? s.indexOf('{') : a, b + 1)); fromDraft = true; render(); changed();
+        statusEl.textContent = 'Imported';
+      } catch(e){ alert('Could not read that file. It needs to be a data.js made by this editor (or valid JSON).'); }
+    };
+    r.readAsText(f); this.value = '';
+  };
+  $('resetBtn').onclick = function(){
+    if (!confirm('Discard your draft and reload what is in data.js?')) return;
+    try { localStorage.removeItem(DRAFT_KEY); } catch(e){}
+    D = JSON.parse(JSON.stringify(window.SITE || {})); fromDraft = false; render(); changed();
+  };
+
+  document.querySelectorAll('[data-pv]').forEach(function(b){ b.onclick = function(){
+    document.querySelectorAll('[data-pv]').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+    $('pvWrap').classList.toggle('mobile', b.dataset.pv==='mobile'); }; });
+  $('mobPv').onclick = function(){ var a = $('app'); a.classList.toggle('show-pv'); this.textContent = a.classList.contains('show-pv') ? 'Back to editing' : 'Preview'; };
+
+  render();
+  try { localStorage.setItem('site-preview', JSON.stringify(D)); } catch(e){}
+  refreshPreview();
+  statusEl.textContent = fromDraft ? 'Draft loaded' : '';
+})();
+</script>
+</body>
+</html>
