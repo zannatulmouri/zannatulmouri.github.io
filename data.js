@@ -5,8 +5,8 @@
 window.SITE = {
   "settings": {
     "pageTitle": "Zannatul Ferdousy Mouri | Academic Portfolio",
-    "navSubtitle": "PhD Student, Electrical Engineering",
-    "accent": "teal",
+    "navSubtitle": "Electrical Engineer",
+    "accent": "amber",
     "highlightName": "Z. F. Mouri",
     "footerText": "© 2026 Zannatul Ferdousy Mouri"
   },
