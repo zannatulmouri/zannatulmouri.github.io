@@ -34,12 +34,12 @@ window.SITE = {
     {
       "id": "metrics",
       "label": "Metrics",
-      "show": true
+      "show": false
     },
     {
       "id": "skills",
       "label": "Skills",
-      "show": true
+      "show": false
     },
     {
       "id": "publications",
@@ -58,7 +58,7 @@ window.SITE = {
     },
     {
       "id": "activities",
-      "label": "Leadership",
+      "label": "Outreach",
       "show": true
     },
     {
@@ -69,7 +69,7 @@ window.SITE = {
     {
       "id": "references",
       "label": "References",
-      "show": true
+      "show": false
     },
     {
       "id": "contact",
@@ -79,8 +79,8 @@ window.SITE = {
   ],
   "profile": {
     "name": "Zannatul Ferdousy Mouri",
-    "credentials": "PhD Student",
-    "status": "Graduate Research Assistant",
+    "credentials": "",
+    "status": "",
     "position": "Graduate Research Assistant, Electrical Engineering",
     "institution": "The University of Akron",
     "institutionUrl": "https://www.uakron.edu/engineering/ECE/",
@@ -89,12 +89,12 @@ window.SITE = {
     "photo": "images/profile.jpg",
     "cv": "",
     "keywords": [
-      "UWBG Power Module Packaging",
-      "Dielectric and Material Characterization",
       "Polymer Nanocomposites",
       "Partial Discharge",
       "Motor Winding Insulation",
-      "Multiphysics Simulation"
+      "Power Module Packaging",
+      "Dielectric Characterization",
+      "COMSOL Multiphysics"
     ],
     "links": [
       {
@@ -112,8 +112,8 @@ window.SITE = {
     ]
   },
   "about": {
-    "heading": "Hi, I'm Mouri",
-    "text": "I am a graduate student in Electrical Engineering at The University of Akron, where I work as a Graduate Research Assistant. My research is on polymer nanocomposites for electrical insulation: partial-discharge-free winding insulation for inverter-fed motors (funded by NSF) and nanoparticle-reinforced encapsulants for ultra-wide bandgap power module packaging.\n\nI fabricate the materials, test them (partial discharge, breakdown, dielectric, thermal and mechanical), and model them in COMSOL Multiphysics. Before Akron, I completed my B.Sc. in Electrical and Electronic Engineering at BUET, Bangladesh, and worked on battery modeling and cross-border power-flow studies."
+    "heading": "Hi, I am Zannatul",
+    "text": "I am a Graduate Assistant at The University of Akron, working at the intersection of materials science and power engineering. Modern power electronics, built on ultra-wide bandgap (UWBG) semiconductors, switch faster and at higher voltages than ever, and the electrical insulation system (EIS) around them has to keep up.\n\nMy research addresses this challenge. I fabricate nanocomposite films and molding compounds and characterize their electrical, thermal and mechanical properties. I also have a solid background in the underlying physics to model the dielectric behavior of these materials. My goal is to use this understanding to design novel materials for next-generation UWBG semiconductors and inverter-fed motors."
   },
   "research": {
     "heading": "Current Research",
