@@ -4,7 +4,7 @@
    ===================================================================== */
 window.SITE = {
   "settings": {
-    "pageTitle": "Zannatul Ferdousy Mouri | Academic Portfolio",
+    "pageTitle": "Zannatul Ferdousy Mouri | Portfolio",
     "navSubtitle": "Electrical Engineer",
     "accent": "amber",
     "highlightName": "Z. F. Mouri",
@@ -89,12 +89,12 @@ window.SITE = {
     "photo": "images/profile.jpg",
     "cv": "",
     "keywords": [
+      "UWBG Power Module Packaging",
       "Polymer Nanocomposites",
-      "Partial Discharge",
-      "Motor Winding Insulation",
-      "Power Module Packaging",
+      "Partial Discharge Free EIS",
       "Dielectric Characterization",
-      "COMSOL Multiphysics"
+      "Multiphysics Modeling",
+      "Motor Winding Insulation"
     ],
     "links": [
       {
