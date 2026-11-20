@@ -95,6 +95,7 @@ a.chip:hover{background:rgba(255,255,255,.18)}
 
 /* research grid */
 .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.grid1{display:grid;grid-template-columns:1fr;gap:12px}
 .rcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface-2);border-top:3px solid var(--a)}
 .rcard h3{font:600 17px/1.3 var(--serif);margin:0 0 6px}
 .rcard p{margin:0;font-size:14px;color:var(--muted)}
@@ -243,7 +244,10 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:10px 0 30px
 
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true"><figure><img alt=""><figcaption></figcaption></figure></div>
 
-<script src="data.js"></script>
+<script>
+  /* always load the newest data.js (skips the browser's cached copy) */
+  document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');
+</script>
 <script>
 (function(){
   /* In the editor's live preview, content comes from the editor instead of data.js */
@@ -310,7 +314,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;padding:10px 0 30px
   };
   R.research = function(){
     var r = D.research||{}, it = (r.items||[]).filter(function(x){return filled(x.title);}); if(!it.length) return '';
-    return card('research', head('research','Research Focus', r.heading||'Current Research') + '<div class="grid2">'+it.map(function(x){
+    return card('research', head('research','Research Focus', r.heading||'Current Research') + '<div class="'+(String(S.researchColumns)==='2'?'grid2':'grid1')+'">'+it.map(function(x){
       return '<div class="rcard"><h3>'+esc(x.title)+'</h3><p>'+md(x.description)+'</p></div>'; }).join('')+'</div>');
   };
   R.education = function(){

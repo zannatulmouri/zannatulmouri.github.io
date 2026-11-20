@@ -95,7 +95,10 @@ iframe{border:0;width:100%;height:100%;background:#fff}
   </div>
 </div>
 
-<script src="data.js"></script>
+<script>
+  /* always load the newest data.js (skips the browser's cached copy) */
+  document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');
+</script>
 <script>
 (function(){
   /* ------------------------------------------------------------------
@@ -117,6 +120,7 @@ iframe{border:0;width:100%;height:100%;background:#fff}
       {key:'pageTitle', label:'Browser tab title'},
       {key:'navSubtitle', label:'Subtitle under your name in the top bar'},
       {key:'accent', label:'Colour theme', type:'select', options:['teal','blue','purple','maroon','amber']},
+      {key:'researchColumns', label:'Research section layout', type:'select', options:['1','2'], help:'1 = one topic per row, 2 = two side by side'},
       {key:'highlightName', label:'Your name as it appears in author lists', help:'Every match is highlighted in your publications, e.g. "Mouri ZF".'},
       {key:'footerText', label:'Footer text'} ]},
     {id:'sections', label:'Sections & order', hint:'Turn sections on or off, rename their menu labels, and move them up or down.', type:'sections'},

@@ -7,6 +7,7 @@ window.SITE = {
     "pageTitle": "Zannatul Ferdousy Mouri | Portfolio",
     "navSubtitle": "Electrical Engineer",
     "accent": "amber",
+    "researchColumns": "1",
     "highlightName": "Z. F. Mouri",
     "footerText": "© 2026 Zannatul Ferdousy Mouri"
   },
